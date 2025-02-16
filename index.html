@@ -24,7 +24,13 @@
         async function fetchImages() {
             const response = await fetch('images.php');
             images = await response.json();
-            if (images.length > 0) startSlideshow();
+            console.log("Loaded images:", images); // Debugging
+
+            if (images.length > 0) {
+                startSlideshow();
+            } else {
+                document.getElementById("image-info").textContent = "No images found.";
+            }
         }
 
         function startSlideshow() {
@@ -33,10 +39,13 @@
             const progressBar = document.getElementById("progress-bar");
 
             function updateSlide() {
+                let imgURL = images[index];
+                let imgName = imgURL.split('/').pop(); // Extract filename from URL
+
                 imgElement.style.opacity = 0;
                 setTimeout(() => {
-                    imgElement.src = images[index];
-                    infoElement.textContent = `${images[index]} (${index + 1} / ${images.length})`;
+                    imgElement.src = imgURL;
+                    infoElement.textContent = `${imgName} (${index + 1} / ${images.length})`;
                     progressBar.style.width = `${((index + 1) / images.length) * 100}%`;
                     imgElement.style.opacity = 1;
                     index = (index + 1) % images.length;
