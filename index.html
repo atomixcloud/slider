@@ -51,6 +51,20 @@
             background: lime; 
             transition: width 0.5s; 
         }
+        .controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #playPauseBtn { background: orange; color: white; }
+        #restartBtn { background: red; color: white; }
     </style>
 </head>
 <body>
@@ -58,12 +72,18 @@
         <img id="slideshow" src="" alt="Slideshow">
         <div id="image-info"></div>
         <div id="progress-container"><div id="progress-bar"></div></div>
+        <div class="controls">
+            <button id="playPauseBtn">Pause</button>
+            <button id="restartBtn">Restart</button>
+        </div>
     </div>
 
     <script>
         let images = [];
         let index = 0;
-        const imagePath = "./files/";  // Change this to the directory you want
+        let interval;
+        let isPlaying = true;
+        const imagePath = "./files";  // Set directory to './files'
 
         async function fetchImages() {
             const response = await fetch(`images.php?path=${encodeURIComponent(imagePath)}`);
@@ -90,7 +110,10 @@
             const progressBar = document.getElementById("progress-bar");
 
             function updateSlide() {
-                if (index >= images.length) return; // Stop at the last image
+                if (index >= images.length) {
+                    clearInterval(interval);
+                    return;
+                }
 
                 let imgURL = images[index];
                 let imgName = imgURL.split('/').pop(); // Extract filename from URL
@@ -102,15 +125,34 @@
                     progressBar.style.width = `${((index + 1) / images.length) * 100}%`;
                     imgElement.style.opacity = 1;
                     index++;
-
-                    if (index < images.length) {
-                        setTimeout(updateSlide, 500);
-                    }
                 }, 250);
             }
 
-            updateSlide();
+            interval = setInterval(updateSlide, 500);
         }
+
+        function togglePlayPause() {
+            const btn = document.getElementById("playPauseBtn");
+            if (isPlaying) {
+                clearInterval(interval);
+                btn.textContent = "Play";
+            } else {
+                startSlideshow();
+                btn.textContent = "Pause";
+            }
+            isPlaying = !isPlaying;
+        }
+
+        function restartSlideshow() {
+            clearInterval(interval);
+            index = 0;
+            startSlideshow();
+            document.getElementById("playPauseBtn").textContent = "Pause";
+            isPlaying = true;
+        }
+
+        document.getElementById("playPauseBtn").addEventListener("click", togglePlayPause);
+        document.getElementById("restartBtn").addEventListener("click", restartSlideshow);
 
         fetchImages();
     </script>
