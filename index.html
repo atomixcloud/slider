@@ -63,10 +63,18 @@
     <script>
         let images = [];
         let index = 0;
+        const imagePath = "./files/";  // Change this to the directory you want
 
         async function fetchImages() {
-            const response = await fetch('images.php');
-            images = await response.json();
+            const response = await fetch(`images.php?path=${encodeURIComponent(imagePath)}`);
+            const data = await response.json();
+            
+            if (data.error) {
+                document.getElementById("image-info").textContent = data.error;
+                return;
+            }
+
+            images = data;
             console.log("Loaded images:", images); // Debugging
 
             if (images.length > 0) {
